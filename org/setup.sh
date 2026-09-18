@@ -24,34 +24,38 @@ gh api -X PATCH "orgs/$ORG" \
 echo "   기본 레포 권한 write · 레포 생성·포크·Pages 제한 없음"
 
 log "2. GitHub Actions 정책 (서드파티 액션 공급망 방어)"
-gh api -X PUT "orgs/$ORG/actions/permissions" \
+try gh api -X PUT "orgs/$ORG/actions/permissions" \
   -f enabled_repositories=all -f allowed_actions=selected >/dev/null
-gh api -X PUT "orgs/$ORG/actions/permissions/selected-actions" --input - <<'EOF' >/dev/null
+try gh api -X PUT "orgs/$ORG/actions/permissions/selected-actions" --input - <<'EOF' >/dev/null
 {"github_owned_allowed": true, "verified_allowed": true, "patterns_allowed": []}
 EOF
-gh api -X PUT "orgs/$ORG/actions/permissions/workflow" \
+try gh api -X PUT "orgs/$ORG/actions/permissions/workflow" \
   -f default_workflow_permissions=read -F can_approve_pull_request_reviews=false >/dev/null
 echo "   GitHub 제작·검증된 액션만 허용 · 워크플로 기본 토큰 read-only"
 
 log "3. 팀 core (CODEOWNERS 자동 리뷰 요청용)"
 if ! gh api "orgs/$ORG/teams/core" >/dev/null 2>&1; then
-  gh api -X POST "orgs/$ORG/teams" \
+  try gh api -X POST "orgs/$ORG/teams" \
     -f name=core -f description='코어 메인테이너 — CODEOWNERS 기본 리뷰어' \
     -f privacy=closed -f notification_setting=notifications_enabled >/dev/null
 fi
-gh api -X PUT "orgs/$ORG/teams/core/memberships/$ME" -f role=maintainer >/dev/null
+try gh api -X PUT "orgs/$ORG/teams/core/memberships/$ME" -f role=maintainer >/dev/null
 echo "   core 생성, $ME maintainer"
 
 log "4. 코드 보안 기본 구성 → 새 레포에 자동 적용 (시크릿 유출·취약 의존성 방지)"
 CFG_ID="$(gh api "orgs/$ORG/code-security/configurations" \
-  --jq '.[] | select(.target_type=="organization" and .name=="lab-default") | .id')"
+  --jq '.[] | select(.target_type=="organization" and .name=="lab-default") | .id' 2>/dev/null || true)"
 if [ -z "$CFG_ID" ]; then
   CFG_ID="$(gh api -X POST "orgs/$ORG/code-security/configurations" \
-    --input "$HERE/code-security.json" --jq .id)"
+    --input "$HERE/code-security.json" --jq .id 2>/dev/null || true)"
 fi
-gh api -X PUT "orgs/$ORG/code-security/configurations/$CFG_ID/defaults" \
-  -f default_for_new_repos=all >/dev/null
-echo "   lab-default (id $CFG_ID): Dependabot 알림·보안 업데이트·의존성 그래프·시크릿 스캐닝+푸시 보호"
+if [ -n "$CFG_ID" ]; then
+  try gh api -X PUT "orgs/$ORG/code-security/configurations/$CFG_ID/defaults" \
+    -f default_for_new_repos=all >/dev/null
+  echo "   lab-default (id $CFG_ID): Dependabot 알림·보안 업데이트·의존성 그래프·시크릿 스캐닝+푸시 보호"
+else
+  echo "   !! 코드 보안 구성 생성 실패 (admin:org 스코프 필요)" >&2
+fi
 
 log "5. 조직 전체 기본 브랜치 보호 룰셋 (실수 방지: 삭제·force-push만 막는다)"
 RS_ID="$(gh api "orgs/$ORG/rulesets" --jq '.[] | select(.name=="default-branch-protection") | .id' 2>/dev/null || true)"
@@ -76,6 +80,6 @@ echo "   - 요금제(비공개 레포 룰셋 강제가 필요할 때 Team): http
 
 log "검증"
 gh api "orgs/$ORG" --jq '"   default_repo_permission=" + .default_repository_permission'
-gh api "orgs/$ORG/actions/permissions/workflow" --jq '"   workflow_token=" + .default_workflow_permissions'
+gh api "orgs/$ORG/actions/permissions/workflow" --jq '"   workflow_token=" + .default_workflow_permissions' 2>/dev/null || echo "   workflow_token=(조회 불가)"
 gh api "orgs/$ORG/rulesets" --jq '.[] | "   ruleset " + .name + " " + .enforcement' 2>/dev/null || true
-gh api "orgs/$ORG/teams" --jq '.[] | "   team " + .slug'
+gh api "orgs/$ORG/teams" --jq '.[] | "   team " + .slug' 2>/dev/null || true
