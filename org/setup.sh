@@ -58,7 +58,7 @@ else
   echo "   !! 코드 보안 구성 생성 실패 (admin:org 스코프 필요)" >&2
 fi
 
-log "5. 조직 전체 기본 브랜치 보호 룰셋 (실수 방지: 삭제·force-push만 막는다)"
+log "5. 조직 전체 기본 브랜치 보호 룰셋 (실수 방지: 삭제·force-push만) — Free 플랜은 403, Team 플랜부터"
 RS_ID="$(gh api "orgs/$ORG/rulesets" --jq '.[] | select(.name=="default-branch-protection") | .id' 2>/dev/null || true)"
 [[ "$RS_ID" =~ ^[0-9]+$ ]] || RS_ID=""
 if [ -z "$RS_ID" ]; then
@@ -71,7 +71,7 @@ echo "   (Free 플랜에서는 공개 레포에만 강제된다 — 비공개 �
 
 log "6. .github 레포 (프로필·템플릿·CODEOWNERS·이 스크립트)"
 if ! gh repo view "$ORG/.github" >/dev/null 2>&1; then
-  (cd "$HERE/.." && gh repo create "$ORG/.github" --private --source . --push \
+  (cd "$HERE/.." && gh repo create "$ORG/.github" --public --source . --push \
      --description 'IndexFinger Lab 조직 프로필·기본 템플릿·조직 설정(config-as-code)')
 else
   (cd "$HERE/.." && git push -u origin HEAD)
