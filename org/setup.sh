@@ -20,8 +20,10 @@ gh api -X PATCH "orgs/$ORG" \
   -f name='IndexFinger Lab' \
   -f description='IndexFinger의 실험·연구 조직' \
   -f default_repository_permission=write \
+  -F members_can_create_public_repositories=false \
+  -F members_can_create_private_repositories=true \
   >/dev/null
-echo "   기본 레포 권한 write · 레포 생성·포크·Pages 제한 없음"
+echo "   기본 레포 권한 write · 새 레포는 private만 (공개 레포 생성 차단)"
 
 log "2. GitHub Actions 정책 (서드파티 액션 공급망 방어)"
 try gh api -X PUT "orgs/$ORG/actions/permissions" \
@@ -49,6 +51,7 @@ if [ -z "$CFG_ID" ]; then
   CFG_ID="$(gh api -X POST "orgs/$ORG/code-security/configurations" \
     --input "$HERE/code-security.json" --jq .id 2>/dev/null || true)"
 fi
+[[ "$CFG_ID" =~ ^[0-9]+$ ]] || CFG_ID=""
 if [ -n "$CFG_ID" ]; then
   try gh api -X PUT "orgs/$ORG/code-security/configurations/$CFG_ID/defaults" \
     -f default_for_new_repos=all >/dev/null
@@ -59,6 +62,7 @@ fi
 
 log "5. 조직 전체 기본 브랜치 보호 룰셋 (실수 방지: 삭제·force-push만 막는다)"
 RS_ID="$(gh api "orgs/$ORG/rulesets" --jq '.[] | select(.name=="default-branch-protection") | .id' 2>/dev/null || true)"
+[[ "$RS_ID" =~ ^[0-9]+$ ]] || RS_ID=""
 if [ -z "$RS_ID" ]; then
   try gh api -X POST "orgs/$ORG/rulesets" --input "$HERE/rulesets/default-branch.json" >/dev/null
 else
