@@ -65,7 +65,7 @@ echo "   (Free 플랜에서는 공개 레포에만 강제된다 — 비공개 �
 
 log "6. .github 레포 (프로필·템플릿·CODEOWNERS·이 스크립트)"
 if ! gh repo view "$ORG/.github" >/dev/null 2>&1; then
-  (cd "$HERE/.." && gh repo create "$ORG/.github" --public --source . --push \
+  (cd "$HERE/.." && gh repo create "$ORG/.github" --private --source . --push \
      --description 'IndexFinger Lab 조직 프로필·기본 템플릿·조직 설정(config-as-code)')
 else
   (cd "$HERE/.." && git push -u origin HEAD)
