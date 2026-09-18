@@ -20,10 +20,8 @@ gh api -X PATCH "orgs/$ORG" \
   -f name='IndexFinger Lab' \
   -f description='IndexFinger의 실험·연구 조직' \
   -f default_repository_permission=write \
-  -F members_can_create_public_repositories=false \
-  -F members_can_create_private_repositories=true \
   >/dev/null
-echo "   기본 레포 권한 write · 새 레포는 private만 (공개 레포 생성 차단)"
+echo "   기본 레포 권한 write (private-only 생성 정책은 Free 플랜에서 불가 — 레포는 만들 때 private으로)"
 
 log "2. GitHub Actions 정책 (서드파티 액션 공급망 방어)"
 try gh api -X PUT "orgs/$ORG/actions/permissions" \
