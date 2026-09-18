@@ -4,7 +4,7 @@
 
 | 경로 | 역할 |
 |---|---|
-| `profile/README.md` · `assets/` | 조직 프로필 페이지 · 아바타(`avatar.png`, 조직 설정에 업로드)·배너 |
+| `assets/avatar.png` | 조직 아바타 원본 (조직 설정에 업로드). 프로필 README·배너는 `.github-private` 레포 |
 | `CODEOWNERS` | 이 레포의 기본 리뷰어 (`@indexfinger-lab/core`) |
 | `CONTRIBUTING.md` · `SECURITY.md` | 기여·보안 제보 안내 (전 레포 상속) |
 | `PULL_REQUEST_TEMPLATE.md` · `ISSUE_TEMPLATE/` | PR·이슈 템플릿 (전 레포 상속) |
