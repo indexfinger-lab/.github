@@ -1,0 +1,23 @@
+name: 버그
+description: 기대와 다르게 동작한다
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: 무엇이 잘못됐나
+      description: 기대한 동작과 실제 동작
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 재현 절차
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 환경
+      placeholder: 버전 / OS / 브라우저 / 커밋 해시

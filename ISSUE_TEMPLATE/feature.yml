@@ -1,0 +1,22 @@
+name: 제안
+description: 새 기능·실험·개선 제안
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 어떤 문제를 푸나
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 제안
+      description: 방법과 대안, 안 하는 선택지도 함께
+    validations:
+      required: true
+  - type: textarea
+    id: success
+    attributes:
+      label: 성공 판정
+      description: 무엇이 참이면 끝난 것인가

@@ -1,0 +1,11 @@
+{
+  "name": "lab-default",
+  "description": "Dependabot 알림·보안 업데이트·의존성 그래프·시크릿 스캐닝(푸시 보호 포함)을 기본으로 켠다. 레포 관리자가 끌 수 없다.",
+  "dependency_graph": "enabled",
+  "dependabot_alerts": "enabled",
+  "dependabot_security_updates": "enabled",
+  "secret_scanning": "enabled",
+  "secret_scanning_push_protection": "enabled",
+  "private_vulnerability_reporting": "enabled",
+  "enforcement": "enforced"
+}
